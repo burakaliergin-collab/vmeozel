@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Verb Matrix — v4.0 (Nihai Sürüm)</title>
+
+<link rel="icon" href="favicon.ico" type="image/x-icon">
+
+<link rel="manifest" href="manifest.json"> 
+
+<link rel="stylesheet" href="style.css">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#667eea">
+
+
+</head>
+<body>
+<div id="splashScreen">
+    <img src="logo.png" alt="Logo" class="splash-logo">
+</div>
+
+<div id="welcomeView" class="view" style="z-index: 3000;">
+    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 80vh; text-align: center;">
+        <h1 style="color: #ffffff; font-size: 2.8rem; margin-bottom: 15px; text-shadow: 0 2px 4px rgba(0,0,0,0.2);">Hoş Geldiniz!</h1>
+        <p style="color: #e2e8f0; font-size: 1.2rem; margin-bottom: 40px; max-width: 500px;">Lütfen çalışmak istediğiniz Almanca seviyesini seçin.</p>
+        
+        <div id="classSelectionContainer" class="button-grid" style="max-width: 600px; width: 100%; justify-content: center;">
+        
+       </div>
+<div style="margin-top: 35px; width: 100%; max-width: 600px; padding: 0 20px;">
+    <button class="btn btn-warning" style="width: 100%; justify-content: center; padding: 15px; font-size: 1.1rem; border-radius: 12px;" 
+            onclick="renderMixedModeList(); showView('mixedSettingsView');">
+        ⭐ Konuları Yıldızla (Karışık Mod Ayarları)
+    </button>
+</div>
+    </div>
+</div>
+
+<div id="mixedView" class="view" style="display: none;">
+
+    <h2 class="section-title">⭐ Karışık Mod – Konu Seçimi</h2>
+
+    <div class="content-box small-muted" style="margin-bottom:10px;">
+        Bu ekranda çalışmak istediğin konuları seçip yıldızlayabilirsin.
+    </div>
+
+    <div id="mixedFilterArea" class="button-grid" style="margin-bottom:15px;">
+        <button class="btn btn-primary" onclick="filterMixed('all')">Tümü</button>
+        <button class="btn btn-secondary" onclick="filterMixed('star')">⭐ Yıldızlılar</button>
+    </div>
+
+    <div id="mixedList" class="button-grid"></div>
+
+</div>
+
+
+<div id="musicPlayerContainer" class="music-player-container">
+    <button id="musicToggleBtn" class="music-toggle-btn" title="Müzik Çal/Durdur">🔊</button>
+    <input type="range" id="musicVolumeSlider" min="0" max="100" value="70" class="music-volume-slider" style="display: none;">
+</div>
+
+<div id="floatingNavTopRight">
+    <button id="classNavBtn" class="floating-nav-btn" style="width: auto; padding: 0 15px; border-radius: 20px; font-weight: bold; font-size: 1rem;" onclick="openClassSelection()">A1</button>
+    
+    <button id="floatingGuideBtn" class="floating-nav-btn" title="Kullanım Kılavuzu" onclick="showGuide()">⭐</button>
+    <button id="modeToggleBtn" class="floating-nav-btn" title="Gece/Gündüz toggle">🌙</button>
+</div>
+
+<button id="floatingBackBtn" class="floating-nav-btn" title="Geri" onclick="goBackInHistory()">🔙</button>
+<button id="floatingHomeBtn" class="floating-nav-btn" title="Ana Menü" onclick="showView('mainMenu')">🏠</button>
+<button id="floatingAdminBtn" class="floating-nav-btn" title="Yönetici" onclick="showView('adminView')">🔧</button>
+<div class="container">
+  <header>
+    <img src="logo.png" alt="Verb Matrix Logo" style="max-width: 280px; height: auto; margin: 10px auto 0; display: block;">
+    <div class="subtitle" id="appSubtitle" data-translate-key="app.subtitle">Fiiller İle Almanca Öğrenme Platformu</div>
+  </header>
+
+  <div id="mainMenu" class="view active">
+    <div class="button-grid">
+      <button class="btn btn-primary" id="btnCalis" data-translate-key="menu.calis" onclick="loadAndShowGroupMenu()">📚 Çalış</button>
+      <button class="btn btn-info" id="btnTekrar" data-translate-key="menu.tekrar" onclick="showView('tekrarMenu')">🔄 Tekrar</button>
+      <button class="btn btn-warning" id="btnProgress" data-translate-key="menu.progress" onclick="showView('progress')">📊 İlerleme</button>
+      <button class="btn btn-secondary" id="btnSettings" data-translate-key="menu.settings" onclick="showView('settings')">⚙️ Ayarlar</button>
+    </div>
+  </div>
+
+  <div id="tekrarMenu" class="view">
+    <h2 class="large-centered-title" data-translate-key="titles.tekrar">🔄 TEKRAR</h2>
+    <div class="button-grid">
+      <button class="btn btn-srs-zor" onclick="startTekrar('zor')">
+        <span data-translate-key="srs.zorlandiklarim">ZORLANDIKLARIM</span> (<span id="tekrarCountZor">0</span>)
+      </button>
+      <button class="btn btn-srs-normal" onclick="startTekrar('normal')">
+        <span data-translate-key="srs.normal">NORMAL</span> (<span id="tekrarCountNormal">0</span>)
+      </button>
+      <button class="btn btn-srs-ogrendim" onclick="startTekrar('ogrendim')">
+        <span data-translate-key="srs.ogrendiklerim">ÖĞRENDİKLERİM</span> (<span id="tekrarCountOgrenildi">0</span>)
+      </button>
+    </div>
+    </div>
+
+  <div id="tekrarModeMenu" class="view">
+    <h2 class="large-centered-title" id="tekrarModeTitle">TEKRAR MODU</h2>
+
+    <div class="content-box" style="margin-bottom: 20px;">
+      <h4 data-translate-key="titles.conversionSelect">Çeviri Yönünü Seçin:</h4>
+      <div class="button-grid" style="grid-template-columns: 1fr 1fr;">
+        <button class="btn btn-primary" id="tekrarModeTRDE" onclick="setConversionMode('tr-de'); startTekrarModePrompt()">
+            <span class="led-indicator" style="margin-right: 12px;"></span> 🇹🇷 TR → DE 🇩🇪
+        </button>
+        <button class="btn btn-info" id="tekrarModeDETR" onclick="setConversionMode('de-tr'); startTekrarModePrompt()">
+            <span class="led-indicator" style="margin-right: 12px;"></span> 🇩🇪 DE → TR 🇹🇷
+        </button>
+      </div>
+    </div>
+
+    <div class="button-grid">
+      <button class="btn btn-secondary" onclick="startTekrarMode('cloze')">🔲 <span data-translate-key="modes.cloze">Boşluk Doldurma</span></button>
+      <button class="btn btn-secondary" onclick="startTekrarMode('wordorder')">🔤 <span data-translate-key="modes.wordorder">Kelimeleri Sıralama</span></button>
+      <button class="btn btn-primary" onclick="startTekrarMode('quiz')">🎯 <span data-translate-key="modes.quiz">Quiz (Test)</span></button>
+    </div>
+    </div>
+
+  <div id="groupMenu" class="view">
+    <div class="group-select-header">
+      <h2 data-translate-key="titles.start">BAŞLA</h2>
+    </div>
+    <div class="group-select-columns">
+      <div class="group-column-title-container">
+        <div class="group-column-title" data-translate-key="titles.groupSelect">Grup Seç</div>
+      </div>
+      <div class="group-column-title-container">
+        <div class="group-column-title" data-translate-key="titles.storySelect">Hikaye Seç</div>
+      </div>
+    </div>
+    <div id="groupButtons"></div>
+    </div>
+
+  <div id="verbMenu" class="view">
+    <h2 class="section-title" data-translate-key="titles.verbSelect">FİİL SEÇ</h2>
+    <div id="verbButtons" class="button-grid"></div>
+    </div>
+  <div id="sectionMenu" class="view">
+    <h2 class="section-title" data-translate-key="titles.sectionSelect">BÖLÜM SEÇ</h2>
+    <div id="sectionButtons" class="button-grid"></div>
+    </div>
+
+  <div id="modeMenu" class="view">
+    <h2 class="large-centered-title" data-translate-key="titles.conversionSelect">ÇEVİRİ YÖNÜ</h2>
+
+    <div class="content-box" style="margin-bottom: 20px;">
+      <h4 data-translate-key="titles.conversionSelect">Çeviri Yönünü Seçin:</h4>
+      <div class="button-grid" style="grid-template-columns: 1fr 1fr;">
+        <button class="btn btn-primary" id="modeTRDE" onclick="setConversionMode('tr-de'); startMode('study')">🇹🇷 TR → DE 🇩🇪</button>
+        <button class="btn btn-info" id="modeDETR" onclick="setConversionMode('de-tr'); startMode('study')">🇩🇪 DE → TR 🇹🇷</button>
+      </div>
+    </div>
+    </div>
+
+  <div id="learningView" class="view">
+    <h2 class="section-title" id="learningTitle">📚 Çalışma</h2>
+    <h3 id="learningSubtitle" style="text-align:center; color: #4a5568; font-weight: 600; margin-top: -10px; margin-bottom: 10px;"></h3>
+    
+    <div class="progress-container">
+      <div class="progress-bar"><div id="progressFill" class="progress-fill">0%</div></div>
+      <div style="text-align:center;margin-top:8px;font-weight:700;"><span id="progressText">0 / 0</span></div>
+    </div>
+      <div class="content-box">
+      <div id="learningContent"></div>
+      <div id="hintPanel" class="hint-area" style="display:none"></div>
+      <div id="resultArea"></div>
+      <div id="answerArea"></div>
+    </div>
+    
+    <div id="completionControls" class="primary-action-container" style="display: none; margin-top: 15px;">
+        <button class="btn btn-primary" id="nextStepBtn" style="min-width: 250px; justify-content: center;"></button>
+    </div>
+
+    <div id="srsControls" class="button-group-row">
+        <button class="btn btn-srs-zor" onclick="rateCard('zor')">🥵 <span data-translate-key="srs.zor">ZOR</span></button>
+        <button class="btn btn-srs-normal" onclick="rateCard('normal')">🤔 <span data-translate-key="srs.normal">NORMAL</span></button>
+        <button class="btn btn-srs-ogrendim" onclick="rateCard('ogrendim')">✅ <span data-translate-key="srs.ogrendim">ÖĞRENDİM</span></button>
+    </div>
+    <div id="quickEditPanel" class="content-box" style="display:none; margin-top: 15px;">
+        <h4 id="quickEditTitle" style="margin-bottom: 10px;">Sayfa İçeriği Hızlı Düzenleme</h4>
+        <label style="display:block;margin-top:12px;" data-translate-key="labels.tr">TR Cümle:</label>
+        <textarea id="qe_tr" class="textarea-field" rows="3"></textarea>
+        <label style="display:block;margin-top:12px;" data-translate-key="labels.de">DE Cümle:</label>
+        <textarea id="qe_de" class="textarea-field" rows="3"></textarea>
+        <label style="display:block;margin-top:12px;" data-translate-key="labels.hintText">Cümle İpucu:</label>
+        <textarea id="qe_hint" class="textarea-field" rows="3" placeholder="Bu cümleye özel ipucu ekleyin/düzenleyin."></textarea>
+        <div class="button-group-row">
+            <button class="btn btn-secondary" onclick="saveQuickEdit()">✅ <span data-translate-key="buttons.save">Kaydet</span> & Kapat</button>
+            <button class="btn btn-danger" onclick="document.getElementById('quickEditPanel').style.display='none'" data-translate-key="buttons.cancel">İptal</button>
+        </div>
+    </div>
+    <div class="primary-action-container">
+      <button class="btn" id="actionBtn" data-translate-key="buttons.show" onclick="handleAction()">Kontrol Et / Göster</button>
+    </div>
+
+    <div id="learningControlsAccordion">
+        <div class="learning-controls-main">
+            <button class="btn btn-info" onclick="toggleLearningPanel('panelHint')">💡 İpucu</button>
+            <button class="btn btn-primary" onclick="toggleLearningPanel('panelListen')">🔊 Dinle</button>
+            <button class="btn btn-secondary" onclick="toggleLearningPanel('panelEdit')">✏️ Düzenle</button>
+        </div>
+
+        <div id="panelHint" class="learning-controls-panel">
+            <div class="button-grid-learning">
+                <button class="btn btn-ai" onclick="getAIHint()">🧠 AI İpucu Al</button>
+                <button class="btn btn-info" onclick="showHintDetail('section')">Bölüm İpucu</button>
+                <button class="btn btn-info" onclick="showHintDetail('verb')">Fiil İpucu</button>
+                <button class="btn" id="toggleHintBtn" data-translate-key="buttons.hintToggle" onclick="toggleHintPanel()">Cümle İpucu</button>
+            </div>
+        </div>
+        <div id="panelListen" class="learning-controls-panel">
+             <div class="button-grid-learning">
+                <button class="btn" id="autoPlayBtn" onclick="toggleAutoPlay()">
+                    <span class="led-indicator" id="autoPlayLed"></span>Otomatik Dinle
+                </button>
+                <button class="btn" id="slowModeToggleBtn" onclick="toggleSpeechSpeed()">
+                    <span class="led-indicator" id="slowModeLedL"></span>🔊 Yavaş Mod
+                </button>
+                <button class="btn" id="btnPlayDE_learning" data-translate-key="buttons.playDE" onclick="playCurrentSentence('de')">🔊 Almanca Dinle</button>
+                <button class="btn" id="btnPlayTR" data-translate-key="buttons.playTR" onclick="playCurrentSentence('tr')">🔊 Türkçe Dinle</button>
+             </div>
+        </div>
+        <div id="panelEdit" class="learning-controls-panel">
+             <div class="button-grid-learning">
+                <button class="btn" id="btnQuickEdit" onclick="showQuickEditPanel()">✏️ Düzelt/Ekle</button>
+                <button class="btn" onclick="previousQuestion()" data-translate-key="buttons.previous">← Önceki</button>
+                </div>
+        </div>
+    </div>
+    </div>
+
+  <div id="detailViewLayer" class="view">
+    <div class="container">
+        <h2 id="detailViewTitle"></h2>
+        <div id="detailViewContent" class="content-box" style="white-space: pre-wrap;"></div>
+        </div>
+  </div>
+
+  <div id="storyView" class="view">
+    <h2 class="section-title" id="storyTitle" data-translate-key="titles.story">Hikaye</h2>
+    <div class="content-box" id="storyContent"></div>
+    <div class="button-grid-learning">
+      <button class="btn btn-warning" onclick="showStoryQuestions()" data-translate-key="buttons.questions">📝 Sorular</button>
+      <button class="btn" id="storySlowModeToggleBtn" onclick="toggleSpeechSpeed()">
+        <span class="led-indicator" id="slowModeLedS"></span>🔊 Yavaş Mod
+      </button>
+      <button class="btn" id="btnPlayDE_story" data-translate-key="buttons.playDE" onclick="playStoryAudio('de')">🔊 Almanca Dinle</button>
+      <button class="btn" onclick="playStoryAudio('tr')" data-translate-key="buttons.playTR">🔊 Türkçe Dinle</button>
+      </div>
+  </div>
+
+  <div id="storyQuestionsView" class="view">
+    <h2 class="section-title" data-translate-key="titles.storyQuestions">Hikaye Soruları</h2>
+    <div class="content-box" id="storyQuestionsContent"></div>
+    </div>
+  <div id="settings" class="view">
+    <h2 class="section-title" data-translate-key="titles.settings">⚙️ Ayarlar</h2>
+    <div class="content-box">
+      <h3 data-translate-key="settings.dataManagement">💾 Veri Yönetimi</h3>
+      <div class="button-grid" style="grid-template-columns: 1fr 1fr; margin-top: 10px;">
+        <button class="btn btn-primary" style="width:100%;" onclick="importDataFromFile()" data-translate-key="buttons.importJSON">📥 İçerik Yükle (JSON)</button>
+        <button class="btn btn-secondary" style="width:100%;" onclick="exportData()" data-translate-key="buttons.exportJSON">📤 İçerik İndir (JSON)</button>
+      </div>
+    </div>
+    <div class="content-box">
+      <h3 data-translate-key="settings.appearance">🎨 Görünüm ve Diğer</h3>
+      <div style="margin-top: 12px;">
+          <label style="display:block;font-weight:700;margin-bottom:6px" data-translate-key="settings.language">Dil:</label>
+          <div style="display:flex;gap:8px">
+            <button class="lang-btn active" id="langTR" onclick="changeLanguage('tr', this)">Türkçe</button>
+            <button class="lang-btn" id="langDE" onclick="changeLanguage('de', this)">Deutsch</button>
+          </div>
+      </div
+      ><label style="display:flex;align-items:center;gap:8px;margin-top:15px;">
+          <input type="checkbox" id="nightModeToggle" style="width: 20px; height: 20px;"> <span data-translate-key="settings.nightMode">Gece Modu</span>
+      </label>
+      <div style="margin-top: 15px;">
+        <label style="display:block;font-weight:700;margin-bottom:6px" data-translate-key="settings.music">Müzik:</label>
+        <div style="display:flex; align-items: center; gap: 10px;">
+          <button id="settingsMusicToggle" class="btn btn-primary btn-small" onclick="musicPlayer.toggleMusic()">🔊 Çal/Durdur</button>
+          <input type="range" id="settingsMusicVolume" min="0" max="100" value="70" style="flex: 1;">
+        </div>
+      </div>
+    </div>
+    <div class="content-box">
+        <h3 data-translate-key="settings.appUpdate">🔄 Uygulama</h3>
+        <button class="btn btn-warning" style="width:100%; margin-top: 10px;" onclick="forceUpdateApp()" data-translate-key="buttons.forceUpdate">🔄 Uygulamayı Güncelle</button>
+    </div>
+    <div class="content-box" style="margin-top:12px">
+      <h3 data-translate-key="settings.pasteJSONTitle">📝 JSON Yapıştır (Mobil)</h3>
+      <textarea id="jsonPaste" class="textarea-field" data-translate-key="placeholders.jsonPaste" placeholder="JSON içeriğinizi buraya yapıştırın..." rows="5"></textarea>
+      <div class="button-group-row" style="margin-top:8px">
+        <button class="btn btn-primary" onclick="loadJsonFromTextarea()" data-translate-key="buttons.pasteAndLoad">📥 Yapıştır & Yükle</button>
+        <button class="btn btn-danger" onclick="document.getElementById('jsonPaste').value=''" data-translate-key="buttons.clear">Temizle</button>
+      </div>
+    </div>
+    </div>
+ 
+  <div id="progress" class="view">
+    <h2 class="section-title" data-translate-key="titles.progress">📊 İlerleme</h2>
+    <div class="content-box">
+      <h3 data-translate-key="titles.srsStats">Tekrar Durumu</h3>
+      <div class="progress-stats-grid">
+        <div class="stat-card stat-card-zor">
+          <h4 data-translate-key="srs.zorlandiklarim">ZORLANDIKLARIM</h4>
+          <div class="stat-value" id="progressStatZor">0</div>
+        </div>
+           
+        <div class="stat-card stat-card-normal">
+          <h4 data-translate-key="srs.normal">NORMAL</h4>
+          <div class="stat-value" id="progressStatNormal">0</div>
+        </div>
+        <div class="stat-card stat-card-ogrendim">
+          <h4 data-translate-key="srs.ogrendiklerim">ÖĞRENDİKLERİM</h4>
+          <div class="stat-value" id="progressStatOgrenildi">0</div>
+        </div>
+      </div>
+    </div>
+    <div class="content-box">
+      <h3 data-translate-key="titles.totalProgress">Toplam Çalışma İlerlemesi</h3>
+      <p class="small-muted" data-translate-key="messages.totalProgressDesc">Tüm içerikteki (cümlelerdeki) ilerleme durumunuz.</p>
+      <div class="progress-container" style="margin-top: 15px;">
+        <div class="progress-bar"><div id="totalProgressFill" class="progress-fill">0%</div></div>
+        <div style="text-align:center;margin-top:8px;font-weight:700;"><span id="totalProgressText">0 / 0</span></div>
+      </div>
+    </div>
+    <div class="content-box">
+        <h3 data-translate-key="settings.progressManagement">💾 İlerleme Veri Yönetimi</h3>
+        <div class="button-grid" style="grid-template-columns: 1fr 1fr; margin-top: 10px;">
+           <button class="btn btn-primary" style="width:100%;" onclick="importSrsData()" data-translate-key="buttons.importProgress">📥 İlerleme Yükle</button>
+           <button class="btn btn-secondary" style="width:100%;" onclick="exportSrsData()" data-translate-key="buttons.exportProgress">📤 İlerleme İndir</button>
+        </div>
+        <button class="btn btn-danger" style="width:100%; margin-top: 10px;" onclick="resetSrsData()" data-translate-key="buttons.resetSrs">⚠️ Tüm İlerlemeyi Sıfırla</button>
+    </div>
+   
+  </div>
+  <div id="mixedSettingsView" class="view">
+    <h2 class="large-centered-title">⭐ KONU SEÇİMİ</h2>
+    <div class="content-box">
+        <p style="text-align:center; color:#666;">
+            Karışık Mod'da çalışmak istediğiniz konulara yıldız verin.<br>
+            <small>(Sadece yıldızlı konular fiil menüsünde görünecektir)</small>
+        </p>
+        
+        <div style="display:flex; justify-content:center; gap:10px; margin-bottom:15px;">
+            <button class="btn btn-primary" onclick="renderMixedModeList('all')">Tümü</button>
+            <button class="btn btn-warning" onclick="renderMixedModeList('starred')">Sadece Yıldızlılar</button>
+        </div>
+
+        <div id="mixedTopicList" class="button-grid"></div>
+    </div>
+</div>
+  <div id="adminView" class="view">
+    <h2 class="section-title" data-translate-key="titles.adminPanel">🔧 Yönetici Paneli</h2>
+    <div class="button-grid">
+      <button class="btn btn-primary" onclick="showView('adminContentView')" data-translate-key="admin.contentManagement">📚 İçerik Yönetimi</button>
+      <button class="btn btn-warning" onclick="showGroupVerbImporter()">🏗️ Grup & Fiil Yükle</button>
+      <button class="btn btn-info" onclick="showTsvImporter()">📊 Toplu Cümle Yükle</button>
+      <button class="btn btn-secondary" onclick="showView('adminSentenceListView')" data-translate-key="admin.listAllSentences">📋 Tüm Cümleleri Listele</button>
+      <button class="btn btn-success" onclick="showView('adminDataManagementView')">💾 Gelişmiş Veri Yönetimi</button> 
+    </div>
+    <div id="adminGroupVerbArea" class="content-box" style="display:none; margin-top: 15px; border-color: #fbd38d;">
+        <h4 data-translate-key="admin.groupVerbTitle">🏗️ Toplu Grup & Fiil Yükleme</h4>
+        <p class="small-muted" data-translate-key="admin.groupVerbDesc">
+          Excel'den kopyaladığınız YENİ GRUP ve FİİL listenizi buraya yapıştırın.<br>
+          Kullanmanız gereken sütun sırası (Sekme/Tab ile ayrılmış):<br>
+          <b>GrupID | GrupAdı | FiilID | FiilAdı (TR) | FiilAdı (DE)</b>
+        </p>
+        <textarea id="groupVerbPasteArea" class="textarea-field" rows="10" placeholder="g21 (Tab) PAKET TESLİM SÜRECİ (Tab) v61 (Tab) almak, toplamak (Tab) abholen..."></textarea>
+        <div class="button-group-row">
+            <button class="btn btn-warning" onclick="parseAndImportGroupsAndVerbs()">✅ <span data-translate-key="buttons.pasteAndLoadTsv">Yükle ve İşle</span></button>
+            <button class="btn btn-danger" onclick="document.getElementById('adminGroupVerbArea').style.display='none'" data-translate-key="buttons.cancel">İptal</button>
+      </div>
+ </div>
+
+    <div id="adminTsvArea" class="content-box" style="display:none; margin-top: 15px; border-color: #10b981;">
+             <h4 data-translate-key="admin.tsvTitle">📊 Toplu Cümle Yükle</h4>
+
+        <!-- YENİ: Grup ve Fiil Seçim Alanları -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; align-items: flex-end; margin-bottom: 15px;">
+            <div>
+                <label style="font-weight:bold;">1. Grup Seçin</label>
+                <select id="bulk_import_group" class="select-field"></select>
+            </div>
+            <div>
+                <label style="font-weight:bold;">2. Fiil Seçin</label>
+                <select id="bulk_import_verb" class="select-field"></select>
+            </div>
+        </div>
+
+        <!-- YENİ: Dinamik olarak görünecek içerik alanı -->
+        <div id="bulkImportContentArea" style="display: none;">
+            <p class="small-muted">Seçili fiil için cümleleri aşağıdaki formata uygun olarak yapıştırın:<br><b>Konu ID;TR Cümle;DE Cümle;Cümle İpucu (isteğe bağlı)</b></p>
+            <textarea id="tsvPasteArea" class="textarea-field" rows="10" placeholder="1;Ben gidiyorum;Ich gehe;Bu bir ipucudur..."></textarea>
+            <div class="button-group-row">
+                <button class="btn btn-info" onclick="adminPreviewTsv()">🔍 Verileri Önizle</button>
+                <button class="btn btn-danger" onclick="document.getElementById('adminTsvArea').style.display='none'" data-translate-key="buttons.cancel">İptal</button>
+            </div>
+        </div>
+
+
+        <div id="tsvPreviewArea" style="margin-top: 15px;">
+            <!-- Önizleme tablosu buraya gelecek -->
+        </div>
+    </div>
+    </div>
+
+  <div id="adminContentView" class="view">
+     <h2 class="section-title" data-translate-key="admin.contentManagement">📚 İçerik Yönetimi</h2>
+     <div class="button-grid" style="grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));">
+        
+
+
+        <button class="btn btn-secondary" onclick="showAdminForm('editSentence')">✏️ <span data-translate-key="admin.editSentence">Cümle Ekle/Düzenle</span></button>  
+        <button class="btn btn-danger" onclick="showView('adminBulkEditView')">✏️ Toplu Cümle Düzenle</button>
+        <button class="btn btn-primary" onclick="showAdminForm('addGroup')">➕ <span data-translate-key="admin.addGroup">Grup Ekle/Düzenle</span></button>
+        <button class="btn btn-primary" onclick="showAdminForm('addVerb')">➕ <span data-translate-key="admin.addVerb">Fiil Ekle/Düzenle</span></button>
+        <button class="btn btn-primary" onclick="showAdminForm('addSection')">➕ <span data-translate-key="admin.addSection">Konu Havuzu Ekle/Düzenle</span></button>
+        <button class="btn btn-info" onclick="showAdminForm('addStory')">➕ <span data-translate-key="admin.addStory">Hikaye Ekle/Düzenle</span></button>
+        <button class="btn btn-info" onclick="showAdminForm('addHint')">💡 <span data-translate-key="admin.hintManagement">İpucu Ekle/Düzenle</span></button>
+        
+        <button class="btn btn-warning" onclick="showAdminForm('groupOrder')">↕️ Sıralamayı Düzenle (Gruplar)</button> 
+        <button class="btn btn-warning" onclick="showAdminForm('classManagement')">🎓 Sınıf Yönetimi</button>
+        <button class="btn btn-warning" onclick="showAdminForm('domainManager')">📂 Alan (Kategori) Yönetimi</button>
+        <button class="btn btn-primary" onclick="showAdminForm('editGuide')">⭐ <span data-translate-key="admin.editGuide">Kılavuz Metnini Düzenle</span></button>
+     </div>
+     <div id="adminContentArea" class="content-box" style="margin-top: 15px; display: none;">
+     </div>
+     </div>
+
+  <div id="adminSentenceListView" class="view">
+    <h2 class="section-title" data-translate-key="admin.listAllSentences">📋 Tüm Cümleleri Listele</h2>
+    <div class="content-box">
+      <div class="button-group-row" style="margin-bottom:8px;">
+        <button class="btn btn-secondary" onclick="renderAllSentencesTable()" data-translate-key="buttons.refreshList">🔄 Yenile Liste</button>
+        <button class="btn btn-warning" onclick="exportSentencesCsv()" data-translate-key="buttons.exportCSV">📤 TSV İndir (Tablo)</button>
+      </div>
+      <div id="allSentencesTable" style="max-height:60vh;overflow:auto"></div>
+    </div>
+    </div>
+  <div id="adminBulkEditView" class="view">
+    <h2 class="large-centered-title">Toplu Cümle Düzenleme</h2>
+    
+    <div class="content-box">
+        <div class="button-group-row" style="align-items: flex-end; gap: 10px; flex-wrap: wrap;">
+            
+            <div style="flex-grow: 1;">
+                <label style="display:block; margin-bottom:5px; font-weight:bold;">1. Grup Seçin</label>
+                <select id="bulk_edit_group" class="select-field" onchange="bulkEditLoadVerbs()">
+                    <option value="">Yükleniyor...</option>
+                </select>
+            </div>
+
+            <div style="flex-grow: 1;">
+                <label style="display:block; margin-bottom:5px; font-weight:bold;">2. Fiil Seçin</label>
+                <select id="bulk_edit_verb" class="select-field" onchange="bulkEditLoadSentencesForVerb()">
+                    <option value="">Önce Grup Seçin</option>
+                </select>
+            </div>
+            
+            <div>
+                <button class="btn btn-secondary" onclick="fillBulkEditSelectors()" title="Listeyi Yenile">🔄 Yenile</button>
+            </div>
+        </div>
+
+        <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed #ccc;">
+            <button class="btn btn-warning" style="width: 100%;" onclick="adminStartBatchAnalysis()">
+                🧠 YZ Toplu Analiz & İpucu Üret (Seçili Liste İçin)
+            </button>
+             <p class="small-muted" style="margin-top:5px; text-align:center;">
+                Not: "Tüm Bölümler" seçiliyken bu işlem uzun sürebilir. Sunucunun (server.js) açık olduğundan emin olun.
+            </p>
+        </div>
+    </div>
+
+    <div id="bulkEditTableContainer" class="content-box" style="margin-top: 20px;">
+        <p style="text-align:center; color:#718096;">Lütfen yukarıdan Fiil ve Konu seçiniz.</p>
+    </div>
+
+    <div class="button-group-row">
+        <button class="btn btn-secondary" onclick="showView('adminContentView')">← Geri Dön</button>
+    </div>
+</div>
+<div id="adminDataManagementView" class="view">
+    <h2 class="section-title">💾 Gelişmiş Veri Yönetimi</h2>
+
+    <div id="adminDataManagement" class="content-box">
+        <h3 style="margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom:10px;">Yapılandırma & Yedekleme Araçları</h3>
+
+        <div style="margin-bottom: 20px;">
+            <h4 class="small-title">A. Tam Sistem Yedeği (JSON)</h4>
+            <p class="small-muted">Tüm ayarları, ilerlemeyi ve içerikleri tek dosya olarak indirip yükler.</p>
+            <div class="button-group-row">
+                <button class="btn btn-secondary" onclick="exportData()">⬇️ Tam Yedeği İndir (.json)</button>
+                <button class="btn btn-secondary" onclick="document.getElementById('fileInput').click()">⬆️ Yedek Yükle</button>
+            </div>
+        </div>
+
+        <div style="margin-bottom: 20px; background: #f0fff4; padding: 15px; border-radius: 8px; border: 1px dashed #48bb78;">
+            <h4 class="small-title" style="color:#2f855a;">B. Alan & Grup & Fiil Yapılandırması (TSV)</h4>
+            <p class="small-muted">Format: <b>AlanID | AlanTR | AlanDE | GrupID | GrupAdı | FiilID | FiilTR | FiilDE</b></p>
+            
+            <div class="button-group-row">
+                <button class="btn btn-primary" onclick="downloadStructureTSV()">⬇️ Yapıyı İndir (Txt)</button>
+                <button class="btn btn-warning" onclick="toggleStructureImport()">⬆️ Yapısal Veri Yükle</button>
+            </div>
+
+            <div id="structureImportArea" style="display:none; margin-top: 15px;">
+                <textarea id="structureInput" class="textarea-field" rows="10" placeholder="Örn: mesleki|Mesleki Almanca|Beruf|g1|Ofis|v1|yazmak|schreiben..."></textarea>
+                <div style="text-align: right; margin-top: 5px;">
+                    <button class="btn btn-success" onclick="processStructureImport()">✅ Verileri İşle ve Kaydet</button>
+                </div>
+                <p class="small-muted" style="color:red;">Uyarı: Bu işlem Alan ve Grup yapınızı günceller.</p>
+            </div>
+        </div>
+
+        <div style="margin-bottom: 20px; background: #fff5f5; padding: 15px; border-radius: 8px; border: 1px dashed #fc8181;">
+            <h4 class="small-title" style="color:#c53030;">C. ID Değiştirme ve Veri Taşıma Sihirbazı</h4>
+            <p class="small-muted">Bir Grubun veya Fiilin ID'sini değiştirirseniz, içindeki cümleleri kaybetmemek için buradan taşıma yapmalısınız.</p>
+            
+            <div class="button-group-row" style="align-items: flex-end;">
+                <div style="flex-grow:1;">
+                    <label style="font-size:0.8rem; font-weight:bold;">Türü Seçin</label>
+                    <select id="mig_type" class="select-field">
+                        <option value="verb">Fiil ID'si Taşı (v1 -> meslek_v1)</option>
+                        <option value="group">Grup ID'si Taşı (g1 -> meslek_g1)</option>
+                    </select>
+                </div>
+                <div style="flex-grow:1;">
+                    <label style="font-size:0.8rem; font-weight:bold;">Eski ID</label>
+                    <input type="text" id="mig_old_id" class="input-field" placeholder="Örn: v1">
+                </div>
+                <div style="flex-grow:1;">
+                    <label style="font-size:0.8rem; font-weight:bold;">Yeni ID</label>
+                    <input type="text" id="mig_new_id" class="input-field" placeholder="Örn: meslek_v1">
+                </div>
+                <button class="btn btn-danger" onclick="executeMigration()">🚀 Taşı</button>
+            </div>
+            <p id="mig_result" class="small-muted" style="margin-top:10px; color:#2f855a; font-weight:bold;"></p>
+        </div>
+
+        <div style="margin-bottom: 20px; background: #fffaf0; padding: 15px; border-radius: 8px; border: 1px dashed #ed8936;">
+            <h4 class="small-title" style="color:#c05621;">D. Konu Numarasını Değiştir (Başlık + İçerik)</h4>
+            <p class="small-muted">Bir konunun numarasını değiştirdiğinizde, o konuya ait başlık ve tüm cümleler yeni numaraya taşınır.</p>
+            
+            <div class="button-group-row" style="align-items: flex-end;">
+                <div style="flex-grow:1;">
+                    <label style="font-size:0.8rem; font-weight:bold;">Mevcut Numara</label>
+                    <input type="number" id="mov_old_sec" class="input-field" placeholder="Örn: 6">
+                </div>
+                <div style="flex-grow:1;">
+                    <label style="font-size:0.8rem; font-weight:bold;">Yeni Numara</label>
+                    <input type="number" id="mov_new_sec" class="input-field" placeholder="Örn: 16">
+                </div>
+                
+                <button class="btn btn-warning" onclick="changeTopicNumberSystem()">🔄 Numarayı Değiştir</button>
+            </div>
+            <p id="mov_result" class="small-muted" style="margin-top:10px; color:#c05621; font-weight:bold;"></p>
+        </div>
+    </div>
+</div>
+<input type="file" id="fileInput" accept=".json" style="display:none">
+<input type="file" id="progressFileInput" accept=".json" style="display:none">
+<script src="script.js"></script>
+
+</body>
+</html>
