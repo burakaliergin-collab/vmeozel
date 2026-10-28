@@ -1,378 +1,606 @@
+```html
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Kelime Avi</title>
-  
-  <!-- Apple ve Android PWA (Ana Ekran) Etiketleri -->
-  <link rel="manifest" href="manifest.json">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 20px;
-      background-color: #f4f4f9;
-      color: #333;
-      text-align: center;
-      max-width: 600px;
-      margin-left: auto;
-      margin-right: auto;
-    }
-    .hidden { display: none !important; }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Sesli Kelime Avı</title>
     
-    .panel {
-      background: white;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-      margin-bottom: 20px;
-    }
-    
-    .settings-panel {
-      background: #eef2f5;
-      padding: 15px;
-      border-radius: 8px;
-      text-align: left;
-      margin-bottom: 20px;
-      border: 1px solid #ccc;
-    }
-    
-    h1 { color: #2c3e50; }
-    
-    label { font-weight: bold; display: block; margin-top: 10px; margin-bottom: 5px; }
-    select, input[type="text"], input[type="file"] {
-      width: 100%;
-      padding: 10px;
-      margin-bottom: 10px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      box-sizing: border-box;
-      font-size: 16px;
-    }
-    
-    .btn {
-      padding: 12px 20px;
-      font-size: 18px;
-      cursor: pointer;
-      border: none;
-      border-radius: 5px;
-      font-weight: bold;
-      width: 100%;
-      margin-top: 10px;
-    }
-    .btn-primary { background-color: #3498db; color: white; }
-    .btn-secondary { background-color: #95a5a6; color: white; }
-    .btn-correct { background-color: #2ecc71; color: white; }
-    .btn-wrong { background-color: #e74c3c; color: white; }
-    
-    .action-buttons {
-      display: flex;
-      gap: 10px;
-      justify-content: center;
-      margin-top: 20px;
-      flex-wrap: wrap; /* Butonların küçük ekranda alt alta geçmesini sağlar */
-    }
-    .action-buttons .btn { flex: 1; min-width: 120px; }
-    
-    .word { font-size: 2.5em; font-weight: bold; color: #2c3e50; margin: 20px 0; word-wrap: break-word; }
-    .translation { font-size: 1.8em; color: #7f8c8d; margin-bottom: 20px; font-weight: bold; }
-    .timer { font-size: 3em; color: #e74c3c; font-weight: bold; margin: 10px 0; }
-    .mic-status { font-size: 1.2em; color: #7f8c8d; margin: 15px 0; }
-    .mic-active { color: #2ecc71; font-weight: bold; }
-    .turn-indicator { font-size: 1.5em; color: #3498db; font-weight: bold; }
-    
-    .scoreboard { text-align: left; margin-top: 30px; }
-    .player-score {
-      background: #ecf0f1;
-      padding: 10px;
-      margin-bottom: 5px;
-      border-radius: 5px;
-      font-size: 18px;
-      font-weight: bold;
-      display: flex;
-      justify-content: space-between;
-    }
-    
-    .header-bar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .settings-icon {
-      font-size: 24px;
-      cursor: pointer;
-      background: none;
-      border: none;
-    }
-  </style>
-</head>
-<body>
+    <!-- Apple PWA (Progressive Web App) Meta Etiketleri -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Kelime Avı">
+    <meta name="theme-color" content="#ec4899"> <!-- Pink-500 -->
+    <link rel="manifest" href="data:application/json;charset=utf-8,%7B%22name%22%3A%22Sesli%20Kelime%20Av%C4%B1%22%2C%22short_name%22%3A%22Bulmaca%22%2C%22start_url%22%3A%22.%2F%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23ffffff%22%2C%22theme_color%22%3A%22%23ec4899%22%7D">
 
-<div id="setupScreen" class="panel">
-  <div class="header-bar">
-    <h1>Kelime Avı</h1>
-    <button class="settings-icon" onclick="toggleSettings()">⚙️</button>
-  </div>
-  
-  <div id="settingsPanel" class="settings-panel hidden">
-    <label>Özel Kelime Listesi (JSON):</label>
-    <input type="file" id="jsonUpload" accept=".json">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;800;900&display=swap" rel="stylesheet">
     
-    <label>Kart Süresi:</label>
-    <select id="timerSelect">
-      <option value="10">10 Saniye</option>
-      <option value="15">15 Saniye</option>
-      <option value="30">30 Saniye</option>
-    </select>
-  </div>
-
-  <label>Kaç Kişi Oynayacak?</label>
-  <select id="playerCount" onchange="generatePlayerInputs()">
-    <option value="2">2 Oyuncu</option>
-    <option value="3">3 Oyuncu</option>
-    <option value="4">4 Oyuncu</option>
-    <option value="5">5 Oyuncu</option>
-    <option value="6">6 Oyuncu</option>
-    <option value="7">7 Oyuncu</option>
-    <option value="8">8 Oyuncu</option>
-  </select>
-
-  <div id="playerInputs"></div>
-  
-  <button class="btn btn-primary" onclick="startGame()">Oyuna Başla</button>
-</div>
-
-<div id="gameScreen" class="panel hidden">
-  <div class="turn-indicator" id="currentPlayerTurn"></div>
-  <div class="timer" id="timeDisplay">10</div>
-  
-  <div class="word" id="germanWord">...</div>
-  <div class="translation hidden" id="turkishWord">...</div>
-  
-  <div class="mic-status" id="micStatus">🎤 Mikrofon bekleniyor...</div>
-  
-  <div class="action-buttons hidden" id="actionBtns">
-    <button class="btn btn-correct" onclick="handleAnswer(true)">✅ Doğru</button>
-    <button class="btn btn-wrong" onclick="handleAnswer(false)">❌ Yanlış</button>
-  </div>
-  
-  <button class="btn btn-secondary hidden" id="nextBtn" onclick="nextTurn()">Sonraki Kelime ➔</button>
-
-  <div class="scoreboard" id="scoreBoard"></div>
-</div>
-
-<script>
-  let words = [
-    { german: "Der Apfel", turkish: "Elma" },
-    { german: "Der Fußball", turkish: "Futbol Topu" },
-    { german: "Das Fahrrad", turkish: "Bisiklet" },
-    { german: "Die Katze", turkish: "Kedi" },
-    { german: "Das Eis", turkish: "Dondurma" },
-    { german: "Die Schere", turkish: "Makas" },
-    { german: "Die Gitarre", turkish: "Gitar" },
-    { german: "Das Buch", turkish: "Kitap" },
-    { german: "Das Auto", turkish: "Araba" },
-    { german: "Der Schlüssel", turkish: "Anahtar" }
-  ];
-
-  let players = [];
-  let currentPlayerIndex = 0;
-  let currentWord = null;
-  let timerInterval;
-  let audioContext;
-  let analyser;
-  let microphone;
-  let isListening = false;
-  let timeLimit = 10;
-  let timeLeft = 10;
-  
-  document.getElementById('jsonUpload').addEventListener('change', function(e) {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        try {
-          const parsed = JSON.parse(e.target.result);
-          if (Array.isArray(parsed) && parsed.length > 0 && parsed[0].german) {
-            words = parsed;
-            alert(words.length + " kelime başarıyla yüklendi!");
-          }
-        } catch (err) {
-          alert("JSON formatı hatalı!");
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Nunito', 'sans-serif'] },
+                    animation: {
+                        'pop-in': 'popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards',
+                        'pulse-fast': 'pulseFast 1s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    },
+                    keyframes: {
+                        popIn: {
+                            '0%': { opacity: '0', transform: 'scale(0.8)' },
+                            '100%': { opacity: '1', transform: 'scale(1)' },
+                        },
+                        pulseFast: {
+                            '0%, 100%': { opacity: '1' },
+                            '50%': { opacity: '.5' },
+                        }
+                    }
+                }
+            }
         }
-      };
-      reader.readAsText(file);
-    }
-  });
+    </script>
+    <style>
+        body {
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+        
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+        }
+        
+        .modal-overlay {
+            background-color: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 min-h-screen text-white flex flex-col items-center justify-center p-4">
 
-  function toggleSettings() {
-    const panel = document.getElementById('settingsPanel');
-    panel.classList.toggle('hidden');
-  }
+    <!-- Ana Uygulama Konteyneri -->
+    <div id="app" class="w-full max-w-2xl flex flex-col relative h-full min-h-[85vh]">
+        <!-- İçerik JavaScript ile çizilecek -->
+    </div>
 
-  function generatePlayerInputs() {
-    const count = document.getElementById('playerCount').value;
-    const container = document.getElementById('playerInputs');
-    container.innerHTML = '';
-    for(let i = 1; i <= count; i++) {
-      container.innerHTML += `<input type="text" id="p${i}" placeholder="${i}. Oyuncu Adı" value="Oyuncu ${i}">`;
-    }
-  }
+    <!-- Ayarlar Modalı -->
+    <div id="settingsModal" class="fixed inset-0 modal-overlay flex items-center justify-center p-4 z-50 hidden opacity-0 transition-opacity duration-300">
+        <div class="bg-white text-slate-800 rounded-3xl p-6 w-full max-w-sm shadow-2xl transform scale-95 transition-transform duration-300" id="settingsContent">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-bold text-pink-600 flex items-center gap-2">
+                    <i class="ph ph-gear text-3xl"></i> Ayarlar
+                </h2>
+                <button onclick="toggleSettings(false)" class="text-slate-400 hover:text-red-500 transition">
+                    <i class="ph ph-x-circle text-3xl"></i>
+                </button>
+            </div>
+            
+            <!-- Süre Seçimi -->
+            <div class="mb-6">
+                <p class="text-sm text-slate-500 mb-2 font-bold uppercase tracking-wide">Kelime Başına Süre</p>
+                <div class="grid grid-cols-3 gap-2">
+                    <button onclick="setRoundDuration(10, this)" class="timer-btn bg-pink-100 text-pink-700 border-2 border-pink-500 font-black py-2 rounded-xl" data-val="10">10 sn</button>
+                    <button onclick="setRoundDuration(15, this)" class="timer-btn bg-slate-100 text-slate-500 border-2 border-transparent hover:bg-slate-200 font-black py-2 rounded-xl" data-val="15">15 sn</button>
+                    <button onclick="setRoundDuration(30, this)" class="timer-btn bg-slate-100 text-slate-500 border-2 border-transparent hover:bg-slate-200 font-black py-2 rounded-xl" data-val="30">30 sn</button>
+                </div>
+            </div>
 
-  function speakGerman(text) {
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = 'de-DE';
-      utterance.rate = 0.85; 
-      window.speechSynthesis.speak(utterance);
-    }
-  }
+            <hr class="border-slate-200 mb-6">
+            
+            <!-- JSON Yükleme -->
+            <p class="text-sm text-slate-500 mb-2 font-bold uppercase tracking-wide">Özel Kelime Listesi (.json)</p>
+            <div class="border-2 border-dashed border-pink-300 bg-pink-50 rounded-2xl p-4 text-center mb-4">
+                <i class="ph ph-upload-simple text-4xl text-pink-400 mb-2"></i>
+                <input type="file" id="jsonUpload" accept=".json" class="block w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:font-semibold file:bg-pink-600 file:text-white hover:file:bg-pink-700 cursor-pointer" onchange="handleFileUpload(event)">
+            </div>
+            
+            <div id="uploadStatus" class="text-sm text-emerald-600 font-bold mb-4 hidden text-center bg-emerald-100 p-2 rounded-xl"></div>
+            
+            <button onclick="toggleSettings(false)" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-black py-3 rounded-xl transition text-lg mt-2">
+                Kaydet ve Kapat
+            </button>
+        </div>
+    </div>
 
-  async function startGame() {
-    timeLimit = parseInt(document.getElementById('timerSelect').value);
-    const count = document.getElementById('playerCount').value;
-    players = [];
-    for(let i = 1; i <= count; i++) {
-      players.push({
-        name: document.getElementById(`p${i}`).value || `Oyuncu ${i}`,
-        score: 0
-      });
-    }
-    
-    document.getElementById('setupScreen').classList.add('hidden');
-    document.getElementById('gameScreen').classList.remove('hidden');
-    
-    updateScoreBoard();
-    
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
-      audioContext = new (window.AudioContext || window.webkitAudioContext)();
-      analyser = audioContext.createAnalyser();
-      microphone = audioContext.createMediaStreamSource(stream);
-      microphone.connect(analyser);
-      analyser.fftSize = 256;
-      startTurn();
-    } catch (err) {
-      alert("Mikrofon izni alınamadı! Oyun zilsiz olarak (sadece süreyle) devam edecek.");
-      startTurn();
-    }
-  }
+    <!-- Çevrimdışı (Offline) Destek - Blob Service Worker -->
+    <script>
+        const swCode = `
+            const CACHE_NAME = 'kelime-avi-v2';
+            const urlsToCache = [
+                location.href,
+                'https://cdn.tailwindcss.com',
+                'https://unpkg.com/@phosphor-icons/web',
+                'https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;800;900&display=swap'
+            ];
+            self.addEventListener('install', event => {
+                event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache)).then(() => self.skipWaiting()));
+            });
+            self.addEventListener('activate', event => {
+                event.waitUntil(self.clients.claim());
+            });
+            self.addEventListener('fetch', event => {
+                event.respondWith(caches.match(event.request).then(response => response || fetch(event.request)).catch(() => {}));
+            });
+        `;
+        const blob = new Blob([swCode], { type: 'application/javascript' });
+        const swUrl = URL.createObjectURL(blob);
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register(swUrl).catch(err => console.log('SW hatası:', err));
+            });
+        }
+    </script>
 
-  function startTurn() {
-    if (words.length === 0) {
-      alert("Oyun Bitti! Kelimeler tükendi.");
-      return;
-    }
-    
-    document.getElementById('actionBtns').classList.add('hidden');
-    document.getElementById('nextBtn').classList.add('hidden');
-    document.getElementById('turkishWord').classList.add('hidden');
-    
-    const activePlayer = players[currentPlayerIndex];
-    document.getElementById('currentPlayerTurn').innerText = `Sıra: ${activePlayer.name}`;
-    
-    const wordIndex = Math.floor(Math.random() * words.length);
-    currentWord = words[wordIndex];
-    words.splice(wordIndex, 1);
-    
-    document.getElementById('germanWord').innerText = currentWord.german;
-    document.getElementById('turkishWord').innerText = currentWord.turkish;
-    
-    speakGerman(currentWord.german);
-    
-    timeLeft = timeLimit;
-    document.getElementById('timeDisplay').innerText = timeLeft;
-    
-    isListening = true;
-    checkAudio();
-    
-    timerInterval = setInterval(() => {
-      timeLeft--;
-      document.getElementById('timeDisplay').innerText = timeLeft;
-      
-      if (timeLeft <= 0) {
-        timeOut();
-      }
-    }, 1000);
-  }
+    <!-- Oyun JavaScript Kodları -->
+    <script>
+        const defaultVocabularyData = [
+            { german: "Der Apfel", turkish: "Elma" }, { german: "Das Buch", turkish: "Kitap" },
+            { german: "Die Katze", turkish: "Kedi" }, { german: "Der Hund", turkish: "Köpek" },
+            { german: "Das Auto", turkish: "Araba" }, { german: "Das Haus", turkish: "Ev" },
+            { german: "Der Tisch", turkish: "Masa" }, { german: "Der Stuhl", turkish: "Sandalye" },
+            { german: "Das Fenster", turkish: "Pencere" }, { german: "Die Tür", turkish: "Kapı" },
+            { german: "Der Baum", turkish: "Ağaç" }, { german: "Die Blume", turkish: "Çiçek" },
+            { german: "Der Vogel", turkish: "Kuş" }, { german: "Das Wasser", turkish: "Su" },
+            { german: "Das Brot", turkish: "Ekmek" }, { german: "Die Schule", turkish: "Okul" }
+        ];
 
-  function checkAudio() {
-    if (!isListening || !analyser) return;
-    
-    const bufferLength = analyser.frequencyBinCount;
-    const dataArray = new Uint8Array(bufferLength);
-    analyser.getByteFrequencyData(dataArray);
-    
-    let sum = 0;
-    for(let i = 0; i < bufferLength; i++) {
-      sum += dataArray[i];
-    }
-    let average = sum / bufferLength;
-    
-    document.getElementById('micStatus').innerText = "🎤 Dinleniyor...";
-    document.getElementById('micStatus').className = "mic-status mic-active";
+        let vocabularyData = [...defaultVocabularyData];
 
-    if (average > 100) { 
-      buzzerPressed();
-    } else {
-      requestAnimationFrame(checkAudio);
-    }
-  }
+        let gameState = {
+            step: 'setup',
+            playerCount: 2,
+            players: [],
+            deck: [],
+            spacedQueue: [], 
+            currentTurn: 0,
+            activeCard: null,
+            
+            roundDuration: 10,
+            timeLeft: 10,
+            cardTimer: null,
+            
+            matchTimer: 3600, // 1 saat
+            matchInterval: null,
+            
+            audioContext: null,
+            analyser: null,
+            microphone: null,
+            isMicActive: false,
+            
+            speechInterval: null
+        };
 
-  function buzzerPressed() {
-    isListening = false;
-    clearInterval(timerInterval);
-    document.getElementById('micStatus').innerText = "🔔 ZİL ÇALDI!";
-    document.getElementById('micStatus').className = "mic-status";
-    
-    document.getElementById('turkishWord').classList.remove('hidden');
-    document.getElementById('actionBtns').classList.remove('hidden');
-  }
+        function render() {
+            const app = document.getElementById('app');
+            app.innerHTML = '';
 
-  function timeOut() {
-    isListening = false;
-    clearInterval(timerInterval);
-    document.getElementById('micStatus').innerText = "⏰ Süre Doldu!";
-    document.getElementById('micStatus').className = "mic-status";
-    
-    document.getElementById('turkishWord').classList.remove('hidden');
-    words.splice(Math.min(15, words.length), 0, currentWord);
-    document.getElementById('nextBtn').classList.remove('hidden');
-  }
+            if (gameState.step === 'setup') {
+                app.innerHTML = `
+                    <div class="glass-panel rounded-3xl p-6 shadow-2xl flex-1 flex flex-col animate-pop-in">
+                        <div class="flex justify-between items-center mb-6">
+                            <h1 class="text-3xl sm:text-4xl font-black text-white drop-shadow-md tracking-wide">
+                                🎙️ SESLİ KELİME AVI
+                            </h1>
+                            <button onclick="toggleSettings(true)" class="bg-white/20 hover:bg-white/30 p-3 rounded-full transition shadow-lg text-white">
+                                <i class="ph-fill ph-gear text-3xl"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="block text-lg font-bold mb-2 text-white">Kaç Kişi Oynayacak?</label>
+                            <div class="relative">
+                                <select id="playerCountSelect" class="w-full appearance-none bg-white/20 border-2 border-white/50 rounded-2xl p-4 text-xl font-bold text-white outline-none cursor-pointer">
+                                    ${[1,2,3,4,5,6,7,8].map(n => `<option value="${n}" class="text-slate-800" ${n===gameState.playerCount?'selected':''}>${n} Oyuncu</option>`).join('')}
+                                </select>
+                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-white">
+                                    <i class="ph ph-caret-down text-2xl"></i>
+                                </div>
+                            </div>
+                        </div>
 
-  function handleAnswer(isCorrect) {
-    if (isCorrect) {
-      players[currentPlayerIndex].score += 1;
-    } else {
-      players[currentPlayerIndex].score -= 1;
-      words.splice(Math.min(15, words.length), 0, currentWord);
-    }
-    
-    updateScoreBoard();
-    document.getElementById('actionBtns').classList.add('hidden');
-    document.getElementById('nextBtn').classList.remove('hidden');
-  }
+                        <div id="playerNamesContainer" class="space-y-3 mb-6 flex-1 overflow-y-auto pr-2"></div>
 
-  function nextTurn() {
-    currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
-    startTurn();
-  }
+                        <button onclick="startAppGame()" class="w-full bg-gradient-to-r from-green-400 to-emerald-500 hover:from-green-300 hover:to-emerald-400 text-slate-900 font-black text-2xl py-5 rounded-2xl shadow-[0_8px_0_rgb(6,95,70)] active:translate-y-2 active:shadow-none transition-all mt-auto uppercase tracking-widest border-4 border-green-200">
+                            Oyuna Başla!
+                        </button>
+                    </div>
+                `;
+                updatePlayerInputs();
+                document.getElementById('playerCountSelect').onchange = (e) => {
+                    gameState.playerCount = parseInt(e.target.value);
+                    updatePlayerInputs();
+                };
+            } 
+            else if (gameState.step === 'game') {
+                const card = gameState.activeCard;
+                const h = Math.floor(gameState.matchTimer / 3600);
+                const m = Math.floor((gameState.matchTimer % 3600) / 60);
+                const s = gameState.matchTimer % 60;
+                const timeStr = `${h > 0 ? h+':' : ''}${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
 
-  function updateScoreBoard() {
-    const board = document.getElementById('scoreBoard');
-    board.innerHTML = '<h3>Skor Tablosu</h3>';
-    players.forEach(p => {
-      board.innerHTML += `<div class="player-score"><span>${p.name}</span> <span style="color:#2ecc71;">${p.score}</span></div>`;
-    });
-  }
+                app.innerHTML = `
+                    <div class="flex justify-between items-center mb-4 glass-panel py-3 px-5 rounded-2xl">
+                        <div class="flex flex-col">
+                            <span class="text-[10px] uppercase font-bold text-white/70">Kalan Süre</span>
+                            <span class="font-mono text-xl font-black text-yellow-300" id="matchTimerDisplay">${timeStr}</span>
+                        </div>
+                        <div class="flex items-center gap-2 bg-black/20 py-1.5 px-3 rounded-full">
+                            <i class="ph-fill ph-speaker-high text-xl ${gameState.speechInterval ? 'text-green-400 animate-pulse' : 'text-white/50'}"></i>
+                            <div class="relative flex h-3 w-3 ml-2">
+                              ${gameState.isMicActive ? `<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>` : ''}
+                              <span class="relative inline-flex rounded-full h-3 w-3 ${gameState.isMicActive ? 'bg-green-500' : 'bg-red-500'}"></span>
+                            </div>
+                        </div>
+                    </div>
 
-  window.onload = generatePlayerInputs;
-</script>
+                    <div class="w-full bg-black/30 h-4 rounded-full mb-6 overflow-hidden border border-white/20 relative">
+                        <div class="bg-gradient-to-r from-pink-500 to-yellow-400 h-full transition-all duration-1000 linear" style="width: ${(gameState.timeLeft / gameState.roundDuration) * 100}%"></div>
+                        <span class="absolute inset-0 flex items-center justify-center text-[10px] font-black">${gameState.timeLeft} SN</span>
+                    </div>
 
+                    <div class="flex-1 glass-panel rounded-3xl p-8 mb-6 flex flex-col items-center justify-center animate-pop-in relative overflow-hidden border-2 border-white/40">
+                        <button onclick="playSpeechOnce()" class="absolute top-4 right-4 bg-white/20 p-3 rounded-full hover:bg-white/40 transition">
+                            <i class="ph-fill ph-waveform text-2xl"></i>
+                        </button>
+                        <span class="text-sm font-black text-yellow-300 uppercase tracking-widest mb-4">BUL BAKALIM!</span>
+                        <h2 class="text-5xl sm:text-7xl font-black text-center text-white drop-shadow-lg z-10 leading-tight">
+                            ${card ? card.german : '...'}
+                        </h2>
+                    </div>
+
+                    <div class="glass-panel p-4 rounded-3xl mb-4">
+                        <div class="grid grid-cols-2 gap-3">
+                            ${gameState.players.map(p => `
+                                <div class="bg-black/20 rounded-xl p-3 flex justify-between items-center border border-white/10">
+                                    <span class="font-bold text-sm truncate">#${p.id} ${p.name}</span>
+                                    <span class="bg-white text-pink-600 font-black px-2 py-0.5 rounded-lg text-sm">${p.score}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+
+                    <button onclick="triggerRingManual()" class="w-full bg-cyan-500 hover:bg-cyan-400 text-white font-black text-2xl py-6 rounded-3xl shadow-[0_8px_0_rgb(8,145,178)] active:translate-y-2 active:shadow-none transition-all flex items-center justify-center gap-3">
+                        <i class="ph-fill ph-bell-ringing text-4xl animate-pulse-fast"></i> ZİLE BAS!
+                    </button>
+                `;
+            }
+            else if (gameState.step === 'score_popup') {
+                const card = gameState.activeCard;
+                app.innerHTML = `
+                    <div class="glass-panel rounded-3xl p-6 shadow-2xl flex flex-col h-full animate-pop-in border-4 border-white/50 relative overflow-y-auto">
+                        <div class="text-center mb-6 z-10">
+                            <div class="inline-block bg-red-500 text-white font-black px-4 py-1 rounded-full text-sm uppercase mb-4">
+                                ${gameState.timeLeft <= 0 ? 'SÜRE BİTTİ!' : 'ZİL ÇALDI!'}
+                            </div>
+                            <h2 class="text-4xl sm:text-5xl font-black text-white mb-2">${card.german}</h2>
+                            <div class="text-3xl font-black text-yellow-300 bg-black/30 py-3 px-6 rounded-2xl inline-block border border-white/20">
+                                = ${card.turkish}
+                            </div>
+                        </div>
+
+                        <p class="text-white/90 text-center font-bold text-lg mb-4">KİM BİLDİ?</p>
+
+                        <div class="flex-1 space-y-3 pr-2 z-10">
+                            ${gameState.players.map(p => `
+                                <div class="bg-black/30 p-3 rounded-2xl flex flex-col sm:flex-row justify-between items-center border border-white/10 gap-3">
+                                    <div class="font-bold text-lg text-center sm:text-left">#${p.id} - ${p.name}</div>
+                                    <div class="flex gap-2 w-full sm:w-auto">
+                                        <button onclick="awardPoint(${p.id}, 1)" class="flex-1 bg-green-500 text-white px-4 py-3 rounded-xl font-black shadow-[0_4px_0_rgb(22,101,52)] active:translate-y-1 active:shadow-none">
+                                            +1 DOĞRU
+                                        </button>
+                                        <button onclick="awardPoint(${p.id}, -1)" class="flex-1 bg-red-500 text-white px-4 py-3 rounded-xl font-black shadow-[0_4px_0_rgb(153,27,27)] active:translate-y-1 active:shadow-none">
+                                            -1 YANLIŞ
+                                        </button>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+
+                        <button onclick="skipOrTimeout()" class="mt-6 w-full bg-slate-800 text-white font-black py-4 rounded-2xl uppercase tracking-widest shadow-[0_4px_0_rgb(30,41,59)] active:translate-y-1 active:shadow-none z-10">
+                            Pas (Sonra Tekrar Sor)
+                        </button>
+                    </div>
+                `;
+            }
+            else if (gameState.step === 'gameover') {
+                const sorted = [...gameState.players].sort((a,b) => b.score - a.score);
+                app.innerHTML = `
+                    <div class="glass-panel rounded-3xl p-8 shadow-2xl flex-1 flex flex-col items-center justify-center animate-pop-in text-center border-4 border-yellow-400">
+                        <i class="ph-fill ph-trophy text-8xl text-yellow-300 mb-4"></i>
+                        <h1 class="text-4xl font-black text-white mb-2 uppercase">MAÇ BİTTİ!</h1>
+                        
+                        <div class="w-full max-w-md bg-black/20 rounded-3xl p-2 mb-8 mt-4 border border-white/20 overflow-y-auto max-h-[40vh]">
+                            ${sorted.map((p, idx) => `
+                                <div class="flex justify-between items-center p-4 ${idx === 0 ? 'bg-yellow-500 rounded-2xl shadow-lg border-2 border-yellow-200 transform scale-105 my-2' : 'border-b border-white/10'}">
+                                    <span class="font-black text-xl ${idx === 0 ? 'text-slate-900' : 'text-white'}">#${idx+1} ${p.name}</span>
+                                    <span class="font-black text-2xl ${idx === 0 ? 'text-slate-900' : 'text-yellow-300'}">${p.score} PT</span>
+                                </div>
+                            `).join('')}
+                        </div>
+
+                        <button onclick="resetGameSetup()" class="w-full bg-white text-pink-600 font-black text-xl py-4 rounded-2xl shadow-[0_6px_0_rgb(203,213,225)] active:translate-y-1 active:shadow-none uppercase">
+                            Yeniden Oyna
+                        </button>
+                    </div>
+                `;
+            }
+        }
+
+        // --- Ayarlar ve Kurulum ---
+        function setRoundDuration(val, btnEl) {
+            gameState.roundDuration = val;
+            document.querySelectorAll('.timer-btn').forEach(b => {
+                b.classList.remove('bg-pink-100', 'text-pink-700', 'border-pink-500');
+                b.classList.add('bg-slate-100', 'text-slate-500', 'border-transparent');
+            });
+            btnEl.classList.remove('bg-slate-100', 'text-slate-500', 'border-transparent');
+            btnEl.classList.add('bg-pink-100', 'text-pink-700', 'border-pink-500');
+        }
+
+        function updatePlayerInputs() {
+            const container = document.getElementById('playerNamesContainer');
+            if(!container) return;
+            container.innerHTML = '';
+            for(let i=1; i<=gameState.playerCount; i++) {
+                container.innerHTML += `
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
+                            <span class="font-black text-white/50">#${i}</span>
+                        </div>
+                        <input type="text" id="pname_${i}" value="Oyuncu ${i}" class="w-full bg-black/20 border-2 border-white/20 rounded-2xl py-3 pl-12 pr-4 text-white font-bold text-lg outline-none focus:border-white/60">
+                    </div>
+                `;
+            }
+        }
+
+        function toggleSettings(show) {
+            const modal = document.getElementById('settingsModal');
+            if(show) {
+                modal.classList.remove('hidden');
+                setTimeout(() => {
+                    modal.classList.remove('opacity-0');
+                    document.getElementById('settingsContent').classList.remove('scale-95');
+                }, 10);
+            } else {
+                modal.classList.add('opacity-0');
+                document.getElementById('settingsContent').classList.add('scale-95');
+                setTimeout(() => { modal.classList.add('hidden'); }, 300);
+            }
+        }
+
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const json = JSON.parse(e.target.result);
+                    if (Array.isArray(json) && json[0].german && json[0].turkish) {
+                        vocabularyData = [...json]; 
+                        const statusEl = document.getElementById('uploadStatus');
+                        statusEl.innerText = `${json.length} kelime yüklendi!`;
+                        statusEl.classList.remove('hidden');
+                    } else alert("Hata: JSON formatı { 'german': '...', 'turkish': '...' } dizisi olmalıdır.");
+                } catch (error) { alert("Geçersiz JSON dosyası."); }
+            };
+            reader.readAsText(file);
+        }
+
+        // --- Ses Sentezi (Web Speech API) ---
+        function playSpeechOnce() {
+            if(!gameState.activeCard || !window.speechSynthesis) return;
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(gameState.activeCard.german);
+            utterance.lang = 'de-DE';
+            utterance.rate = 0.85; // Daha net anlaşılması için biraz yavaş
+            utterance.pitch = 1;
+            window.speechSynthesis.speak(utterance);
+        }
+
+        function startSpeechLoop() {
+            stopSpeechLoop();
+            playSpeechOnce(); // Hemen ilkini oku
+            gameState.speechInterval = setInterval(playSpeechOnce, 3000); // 3 saniyede bir tekrarla
+        }
+
+        function stopSpeechLoop() {
+            if(gameState.speechInterval) {
+                clearInterval(gameState.speechInterval);
+                gameState.speechInterval = null;
+            }
+            if(window.speechSynthesis) {
+                window.speechSynthesis.cancel();
+            }
+        }
+
+        // --- Oyun Akışı ---
+        async function startAppGame() {
+            gameState.players = [];
+            for(let i=1; i<=gameState.playerCount; i++) {
+                const input = document.getElementById(`pname_${i}`);
+                gameState.players.push({
+                    id: i,
+                    name: input && input.value.trim() !== '' ? input.value : `Oyuncu ${i}`,
+                    score: 0
+                });
+            }
+
+            gameState.deck = [...vocabularyData].sort(() => Math.random() - 0.5);
+            gameState.spacedQueue = [];
+            gameState.currentTurn = 0;
+            gameState.matchTimer = 3600; 
+            gameState.step = 'game';
+
+            render();
+            await initMicrophone();
+            
+            // Tarayıcı kısıtlamalarını aşmak için başlatmada boş bir ses çal
+            if(window.speechSynthesis) {
+                let dummy = new SpeechSynthesisUtterance("");
+                dummy.volume = 0;
+                window.speechSynthesis.speak(dummy);
+            }
+
+            startMatchTimer();
+            nextCard();
+        }
+
+        function startMatchTimer() {
+            if(gameState.matchInterval) clearInterval(gameState.matchInterval);
+            gameState.matchInterval = setInterval(() => {
+                gameState.matchTimer--;
+                if(gameState.matchTimer <= 0) {
+                    clearInterval(gameState.matchInterval);
+                    if(gameState.cardTimer) clearInterval(gameState.cardTimer);
+                    stopSpeechLoop();
+                    stopMicrophone();
+                    gameState.step = 'gameover';
+                    render();
+                } else if(gameState.step === 'game') {
+                    const el = document.getElementById('matchTimerDisplay');
+                    if(el) {
+                        const h = Math.floor(gameState.matchTimer / 3600);
+                        const m = Math.floor((gameState.matchTimer % 3600) / 60);
+                        const s = gameState.matchTimer % 60;
+                        el.innerText = `${h>0?h+':':''}${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+                    }
+                }
+            }, 1000);
+        }
+
+        function nextCard() {
+            if(gameState.cardTimer) clearInterval(gameState.cardTimer);
+            stopSpeechLoop();
+            gameState.currentTurn++;
+
+            let drawnFromQueue = false;
+            for(let i=0; i<gameState.spacedQueue.length; i++) {
+                if(gameState.spacedQueue[i].targetTurn <= gameState.currentTurn) {
+                    gameState.activeCard = gameState.spacedQueue[i].item;
+                    gameState.spacedQueue.splice(i, 1);
+                    drawnFromQueue = true;
+                    break;
+                }
+            }
+
+            if(!drawnFromQueue) {
+                if(gameState.deck.length === 0) gameState.deck = [...vocabularyData].sort(() => Math.random() - 0.5);
+                gameState.activeCard = gameState.deck.pop();
+            }
+
+            gameState.timeLeft = gameState.roundDuration;
+            if(gameState.step === 'game') {
+                render();
+                startSpeechLoop(); // Ses döngüsünü başlat
+                startCardTimer();
+            }
+        }
+
+        function startCardTimer() {
+            if(gameState.cardTimer) clearInterval(gameState.cardTimer);
+            gameState.cardTimer = setInterval(() => {
+                gameState.timeLeft--;
+                render();
+                if(gameState.timeLeft <= 0) {
+                    clearInterval(gameState.cardTimer);
+                    stopSpeechLoop();
+                    gameState.step = 'score_popup';
+                    render();
+                }
+            }, 1000);
+        }
+
+        function triggerRingManual() {
+            if(gameState.cardTimer) clearInterval(gameState.cardTimer);
+            stopSpeechLoop();
+            gameState.step = 'score_popup';
+            render();
+        }
+
+        function awardPoint(playerId, delta) {
+            const p = gameState.players.find(x => x.id === playerId);
+            if(p) p.score += delta;
+            if(delta < 0) queueSpacedRepetition();
+            
+            gameState.step = 'game';
+            nextCard();
+        }
+
+        function skipOrTimeout() {
+            queueSpacedRepetition();
+            gameState.step = 'game';
+            nextCard();
+        }
+
+        function queueSpacedRepetition() {
+            gameState.spacedQueue.push({
+                item: gameState.activeCard,
+                targetTurn: gameState.currentTurn + 15
+            });
+        }
+
+        // --- Mikrofon ve Ses Algılama ---
+        async function initMicrophone() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+                gameState.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                gameState.analyser = gameState.audioContext.createAnalyser();
+                gameState.microphone = gameState.audioContext.createMediaStreamSource(stream);
+                
+                gameState.microphone.connect(gameState.analyser);
+                gameState.analyser.fftSize = 256;
+                gameState.isMicActive = true;
+                render();
+                detectSoundLevel();
+            } catch(err) {
+                console.warn("Mikrofon izni alınamadı (Çevrimdışı veya İzin Reddedildi). Ekrana dokunarak zile basabilirsiniz.", err);
+                gameState.isMicActive = false;
+                render();
+            }
+        }
+
+        function detectSoundLevel() {
+            if(!gameState.isMicActive || !gameState.analyser) return;
+            const dataArray = new Uint8Array(gameState.analyser.frequencyBinCount);
+            gameState.analyser.getByteFrequencyData(dataArray);
+            
+            let sum = 0;
+            for(let i=0; i<dataArray.length; i++) sum += dataArray[i];
+            let average = sum / dataArray.length;
+
+            if(average > 65 && gameState.step === 'game') { // Hassasiyeti biraz düşürdüm (konuşma sesi tetiklemesin diye)
+                triggerRingManual();
+                return;
+            }
+            requestAnimationFrame(detectSoundLevel);
+        }
+
+        function stopMicrophone() {
+            gameState.isMicActive = false;
+            if(gameState.audioContext && gameState.audioContext.state !== 'closed') {
+                gameState.audioContext.close();
+            }
+        }
+
+        function resetGameSetup() {
+            if(gameState.matchInterval) clearInterval(gameState.matchInterval);
+            if(gameState.cardTimer) clearInterval(gameState.cardTimer);
+            stopSpeechLoop();
+            stopMicrophone();
+            gameState.step = 'setup';
+            render();
+        }
+
+        window.onload = () => { render(); };
+    </script>
 </body>
 </html>
+```
