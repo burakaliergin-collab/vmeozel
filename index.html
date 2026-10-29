@@ -1,4 +1,4 @@
-```html
+
 <!DOCTYPE html>
 <html lang="tr">
 <head>
@@ -10,7 +10,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Kelime Avı">
-    <meta name="theme-color" content="#ec4899"> <!-- Pink-500 -->
+    <meta name="theme-color" content="#ec4899">
     <link rel="manifest" href="data:application/json;charset=utf-8,%7B%22name%22%3A%22Sesli%20Kelime%20Av%C4%B1%22%2C%22short_name%22%3A%22Bulmaca%22%2C%22start_url%22%3A%22.%2F%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23ffffff%22%2C%22theme_color%22%3A%22%23ec4899%22%7D">
 
     <!-- Tailwind CSS -->
@@ -96,11 +96,15 @@
             <hr class="border-slate-200 mb-6">
             
             <!-- JSON Yükleme -->
-            <p class="text-sm text-slate-500 mb-2 font-bold uppercase tracking-wide">Özel Kelime Listesi (.json)</p>
-            <div class="border-2 border-dashed border-pink-300 bg-pink-50 rounded-2xl p-4 text-center mb-4">
+            <p class="text-sm text-slate-500 mb-2 font-bold uppercase tracking-wide">Kelime Havuzu</p>
+            <div class="border-2 border-dashed border-pink-300 bg-pink-50 rounded-2xl p-4 text-center mb-2">
                 <i class="ph ph-upload-simple text-4xl text-pink-400 mb-2"></i>
                 <input type="file" id="jsonUpload" accept=".json" class="block w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:font-semibold file:bg-pink-600 file:text-white hover:file:bg-pink-700 cursor-pointer" onchange="handleFileUpload(event)">
             </div>
+            
+            <button onclick="clearSavedWords()" class="w-full bg-red-100 text-red-600 hover:bg-red-200 font-bold py-2 rounded-xl text-sm transition mb-4">
+                <i class="ph ph-trash"></i> Hafızadaki Kelimeleri Temizle
+            </button>
             
             <div id="uploadStatus" class="text-sm text-emerald-600 font-bold mb-4 hidden text-center bg-emerald-100 p-2 rounded-xl"></div>
             
@@ -113,7 +117,7 @@
     <!-- Çevrimdışı (Offline) Destek - Blob Service Worker -->
     <script>
         const swCode = `
-            const CACHE_NAME = 'kelime-avi-v2';
+            const CACHE_NAME = 'kelime-avi-v3';
             const urlsToCache = [
                 location.href,
                 'https://cdn.tailwindcss.com',
@@ -192,6 +196,10 @@
                             <button onclick="toggleSettings(true)" class="bg-white/20 hover:bg-white/30 p-3 rounded-full transition shadow-lg text-white">
                                 <i class="ph-fill ph-gear text-3xl"></i>
                             </button>
+                        </div>
+                        
+                        <div class="text-center bg-white/10 rounded-xl p-2 mb-4 font-bold text-sm">
+                            <i class="ph ph-database"></i> Yüklü Kelime Sayısı: <span class="text-yellow-300">${vocabularyData.length}</span>
                         </div>
                         
                         <div class="mb-4">
@@ -334,7 +342,7 @@
             }
         }
 
-        // --- Ayarlar ve Kurulum ---
+        // --- Ayarlar, Kurulum ve JSON LocalStorage ---
         function setRoundDuration(val, btnEl) {
             gameState.roundDuration = val;
             document.querySelectorAll('.timer-btn').forEach(b => {
@@ -384,14 +392,42 @@
                 try {
                     const json = JSON.parse(e.target.result);
                     if (Array.isArray(json) && json[0].german && json[0].turkish) {
-                        vocabularyData = [...json]; 
+                        vocabularyData = [...json];
+                        // Tarayıcı hafızasına kaydet (Bug 1 Çözümü)
+                        localStorage.setItem('savedVocabulary', JSON.stringify(json));
+                        
                         const statusEl = document.getElementById('uploadStatus');
-                        statusEl.innerText = `${json.length} kelime yüklendi!`;
-                        statusEl.classList.remove('hidden');
+                        statusEl.innerText = `${json.length} kelime yüklendi ve hafızaya kaydedildi!`;
+                        statusEl.classList.remove('hidden', 'bg-red-100', 'text-red-600');
+                        statusEl.classList.add('bg-emerald-100', 'text-emerald-600');
+                        render();
                     } else alert("Hata: JSON formatı { 'german': '...', 'turkish': '...' } dizisi olmalıdır.");
                 } catch (error) { alert("Geçersiz JSON dosyası."); }
             };
             reader.readAsText(file);
+        }
+        
+        function clearSavedWords() {
+            localStorage.removeItem('savedVocabulary');
+            vocabularyData = [...defaultVocabularyData];
+            const statusEl = document.getElementById('uploadStatus');
+            statusEl.innerText = "Hafıza temizlendi! Varsayılan kelimelere dönüldü.";
+            statusEl.classList.remove('hidden', 'bg-emerald-100', 'text-emerald-600');
+            statusEl.classList.add('bg-red-100', 'text-red-600');
+            document.getElementById('jsonUpload').value = ""; // inputu sıfırla
+            render();
+        }
+
+        function loadSavedWordsOnStart() {
+            const saved = localStorage.getItem('savedVocabulary');
+            if(saved) {
+                try {
+                    const json = JSON.parse(saved);
+                    if(Array.isArray(json) && json.length > 0) {
+                        vocabularyData = [...json];
+                    }
+                } catch(e) {}
+            }
         }
 
         // --- Ses Sentezi (Web Speech API) ---
@@ -400,15 +436,15 @@
             window.speechSynthesis.cancel();
             const utterance = new SpeechSynthesisUtterance(gameState.activeCard.german);
             utterance.lang = 'de-DE';
-            utterance.rate = 0.85; // Daha net anlaşılması için biraz yavaş
+            utterance.rate = 0.85; 
             utterance.pitch = 1;
             window.speechSynthesis.speak(utterance);
         }
 
         function startSpeechLoop() {
             stopSpeechLoop();
-            playSpeechOnce(); // Hemen ilkini oku
-            gameState.speechInterval = setInterval(playSpeechOnce, 3000); // 3 saniyede bir tekrarla
+            playSpeechOnce(); 
+            gameState.speechInterval = setInterval(playSpeechOnce, 3000); 
         }
 
         function stopSpeechLoop() {
@@ -442,7 +478,6 @@
             render();
             await initMicrophone();
             
-            // Tarayıcı kısıtlamalarını aşmak için başlatmada boş bir ses çal
             if(window.speechSynthesis) {
                 let dummy = new SpeechSynthesisUtterance("");
                 dummy.volume = 0;
@@ -499,7 +534,7 @@
             gameState.timeLeft = gameState.roundDuration;
             if(gameState.step === 'game') {
                 render();
-                startSpeechLoop(); // Ses döngüsünü başlat
+                startSpeechLoop(); 
                 startCardTimer();
             }
         }
@@ -549,6 +584,7 @@
 
         // --- Mikrofon ve Ses Algılama ---
         async function initMicrophone() {
+            if(gameState.isMicActive) return; // Çift döngüyü engelle
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
                 gameState.audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -561,7 +597,7 @@
                 render();
                 detectSoundLevel();
             } catch(err) {
-                console.warn("Mikrofon izni alınamadı (Çevrimdışı veya İzin Reddedildi). Ekrana dokunarak zile basabilirsiniz.", err);
+                console.warn("Mikrofon izni alınamadı. Ekrana dokunarak zile basabilirsiniz.", err);
                 gameState.isMicActive = false;
                 render();
             }
@@ -569,6 +605,13 @@
 
         function detectSoundLevel() {
             if(!gameState.isMicActive || !gameState.analyser) return;
+            
+            // Bug 2 Çözümü: Döngü her zaman devam etmeli, return ile bitirilmemeli.
+            requestAnimationFrame(detectSoundLevel);
+
+            // Sadece soru ekranındayken zil sesini dinle ve tepki ver
+            if (gameState.step !== 'game') return;
+
             const dataArray = new Uint8Array(gameState.analyser.frequencyBinCount);
             gameState.analyser.getByteFrequencyData(dataArray);
             
@@ -576,11 +619,9 @@
             for(let i=0; i<dataArray.length; i++) sum += dataArray[i];
             let average = sum / dataArray.length;
 
-            if(average > 65 && gameState.step === 'game') { // Hassasiyeti biraz düşürdüm (konuşma sesi tetiklemesin diye)
+            if(average > 65) { 
                 triggerRingManual();
-                return;
             }
-            requestAnimationFrame(detectSoundLevel);
         }
 
         function stopMicrophone() {
@@ -599,8 +640,10 @@
             render();
         }
 
-        window.onload = () => { render(); };
+        window.onload = () => { 
+            loadSavedWordsOnStart();
+            render(); 
+        };
     </script>
 </body>
 </html>
-```
